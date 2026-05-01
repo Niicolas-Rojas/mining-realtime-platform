@@ -8,6 +8,7 @@ from prometheus_client import Gauge, generate_latest, CONTENT_TYPE_LATEST
 from src.config import ApiConfig
 from src.db import (
     fetch_active_alerts,
+    fetch_gold_summary,
     fetch_operational_metrics,
     fetch_pipeline_metrics,
     fetch_recent_telemetry,
@@ -75,6 +76,12 @@ def pipeline_metrics() -> dict:
 def active_alerts(limit: int = Query(default=20, ge=1, le=100)) -> dict:
     alerts = fetch_active_alerts(config, limit=limit)
     return {"count": len(alerts), "items": alerts}
+
+
+@app.get("/api/v1/gold/summary")
+def gold_summary(limit: int = Query(default=100, ge=1, le=500)) -> dict:
+    rows = fetch_gold_summary(config, limit=limit)
+    return {"count": len(rows), "items": rows}
 
 
 @app.get("/api/v1/telemetry/trends")

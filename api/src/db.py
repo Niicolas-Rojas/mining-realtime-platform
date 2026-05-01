@@ -205,6 +205,44 @@ def fetch_active_alerts(config: ApiConfig, limit: int = 20) -> list[dict[str, An
     return list(rows)
 
 
+def fetch_gold_summary(config: ApiConfig, limit: int = 100) -> list[dict[str, Any]]:
+    sql = """
+    SELECT
+        event_minute,
+        equipment_id,
+        site,
+        line,
+        event_count,
+        avg_temperature_c,
+        max_temperature_c,
+        avg_vibration_mm_s,
+        max_vibration_mm_s,
+        min_lubrication_pressure_bar,
+        avg_power_kw,
+        avg_anomaly_score,
+        anomaly_events,
+        quality_issue_events,
+        flow_missing_events,
+        warning_events,
+        critical_events,
+        avg_ingestion_latency_ms,
+        max_ingestion_latency_ms,
+        dominant_risk_level,
+        processed_at
+    FROM gold_summary
+    ORDER BY event_minute DESC
+    LIMIT %s;
+    """
+    try:
+        with connect(config.postgres_dsn, row_factory=dict_row) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, (limit,))
+                rows = cursor.fetchall()
+        return list(rows)
+    except Exception:
+        return []
+
+
 def fetch_telemetry_trends(config: ApiConfig, window: int = 60) -> list[dict[str, Any]]:
     sql = """
     WITH recent AS (

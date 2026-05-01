@@ -1,0 +1,120 @@
+name: scheduled-simulator
+
+on:
+  schedule:
+    # Runs Mon and Thu at 10:00 UTC
+    - cron: "0 10 * * 1,4"
+  workflow_dispatch:
+    inputs:
+      duration_seconds:
+        description: "How long to run the simulator (seconds)"
+        default: "600"
+        required: false
+
+jobs:
+  simulate-and-process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      MQTT_BROKER_HOST: ${{ secrets.MQTT_BROKER_HOST }}
+      MQTT_BROKER_PORT: ${{ secrets.MQTT_BROKER_PORT }}
+      MQTT_USERNAME: ${{ secrets.MQTT_USERNAME }}
+      MQTT_PASSWORD: ${{ secrets.MQTT_PASSWORD }}
+      MQTT_USE_TLS: ${{ secrets.MQTT_USE_TLS }}
+      MQTT_TOPIC: ${{ vars.MQTT_TOPIC || 'mining/sag-mill/telemetry' }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT || '5432' }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_SSLMODE: require
+      SIMULATOR_EQUIPMENT_ID: sag-mill-01
+      SIMULATOR_SITE: concentradora-norte
+      SIMULATOR_LINE: linea-a
+      SIMULATOR_INTERVAL_SECONDS: "2.0"
+      SIMULATOR_DATA_ERROR_RATE: "0.03"
+      BRONZE_OUTPUT_PATH: data/bronze/raw_telemetry.ndjson
+      DEAD_LETTER_OUTPUT_PATH: data/dead_letter/rejected_telemetry.ndjson
+      SILVER_OUTPUT_PATH: data/silver/telemetry_clean.csv
+      SILVER_REPORT_PATH: data/silver/quality_report.json
+      GOLD_SUMMARY_PATH: data/gold/equipment_minute_summary.csv
+      GOLD_REPORT_PATH: data/gold/gold_quality_report.json
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install paho-mqtt "psycopg[binary]"
+
+      - name: Create data directories
+        run: mkdir -p data/bronze data/dead_letter data/silver data/gold
+
+      - name: Start ingestion service in background
+        run: |
+          PYTHONPATH=${{ github.workspace }}/ingestion/src \
+            python ingestion/src/main.py &
+          echo "INGESTION_PID=$!" >> $GITHUB_ENV
+          echo "Ingestion started (PID=$!), waiting for it to connect..."
+          sleep 8
+
+      - name: Run simulator
+        timeout-minutes: 15
+        run: |
+          DURATION=${{ github.event.inputs.duration_seconds || '600' }}
+          echo "Running simulator for ${DURATION}s..."
+          PYTHONPATH=${{ github.workspace }}/simulator/src \
+            timeout $DURATION python simulator/src/main.py || true
+          echo "Simulator finished."
+
+      - name: Stop ingestion service
+        if: always()
+        run: |
+          if [ -n "$INGESTION_PID" ]; then
+            kill $INGESTION_PID 2>/dev/null || true
+            echo "Ingestion stopped."
+          fi
+
+      - name: Run processor (silver + gold -> postgres)
+        run: |
+          PYTHONPATH=${{ github.workspace }}/processing python -c "
+          import sys, os
+          sys.path.insert(0, 'processing')
+          from batch.silver_transform import build_silver_dataset
+          from batch.gold_transform import build_gold_dataset, load_gold_rows
+          from batch.pg_storage import build_postgres_dsn, ensure_gold_schema, write_gold_rows
+          from psycopg import connect
+
+          silver = build_silver_dataset(
+              os.getenv('BRONZE_OUTPUT_PATH'),
+              os.getenv('SILVER_OUTPUT_PATH'),
+              os.getenv('SILVER_REPORT_PATH'),
+          )
+          print(f'silver: input={silver.input_records} output={silver.output_records}')
+
+          gold = build_gold_dataset(
+              os.getenv('SILVER_OUTPUT_PATH'),
+              os.getenv('GOLD_SUMMARY_PATH'),
+              os.getenv('GOLD_REPORT_PATH'),
+          )
+          print(f'gold: input={gold.input_rows} output={gold.output_rows}')
+
+          conn = connect(build_postgres_dsn())
+          ensure_gold_schema(conn)
+          rows = load_gold_rows(os.getenv('GOLD_SUMMARY_PATH'))
+          written = write_gold_rows(conn, rows)
+          print(f'gold written to postgres: {written} rows')
+          conn.close()
+          "
+
+      - name: Summary
+        run: |
+          echo "### Simulation complete" >> $GITHUB_STEP_SUMMARY
+          echo "Bronze events: $(wc -l < data/bronze/raw_telemetry.ndjson 2>/dev/null || echo 0)" >> $GITHUB_STEP_SUMMARY
+          echo "Dead-letter events: $(wc -l < data/dead_letter/rejected_telemetry.ndjson 2>/dev/null || echo 0)" >> $GITHUB_STEP_SUMMARY
+          echo "Gold windows: $(tail -n +2 data/gold/equipment_minute_summary.csv 2>/dev/null | wc -l || echo 0)" >> $GITHUB_STEP_SUMMARY

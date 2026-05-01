@@ -15,7 +15,13 @@ import requests
 import streamlit as st
 
 
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
+def _resolve_api_url() -> str:
+    try:
+        return st.secrets["API_BASE_URL"].rstrip("/")
+    except Exception:
+        return os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
+
+API_BASE_URL = _resolve_api_url()
 GOLD_SUMMARY_PATH = os.getenv("GOLD_SUMMARY_PATH", "data/gold/equipment_minute_summary.csv")
 GOLD_REPORT_PATH = os.getenv("GOLD_REPORT_PATH", "data/gold/gold_quality_report.json")
 
@@ -56,6 +62,16 @@ def fetch_json(path: str, params: dict[str, Any] | None = None, default: dict[st
 
 @st.cache_data(ttl=30)
 def load_gold_summary(path: str) -> list[dict[str, Any]]:
+    # Try API first (needed for Streamlit Cloud where local files are unavailable)
+    try:
+        response = requests.get(f"{API_BASE_URL}/api/v1/gold/summary", params={"limit": 500}, timeout=4)
+        if response.status_code == 200:
+            items = response.json().get("items", [])
+            if items:
+                return [normalize_gold_row(row) for row in items]
+    except Exception:
+        pass
+    # Fall back to local CSV
     target = Path(path)
     if not target.exists():
         return []
@@ -72,7 +88,7 @@ def load_gold_report(path: str) -> dict[str, Any]:
         return json.load(file_handle)
 
 
-def normalize_gold_row(row: dict[str, str]) -> dict[str, Any]:
+def normalize_gold_row(row: dict[str, Any]) -> dict[str, Any]:
     numeric_fields = {
         "event_count": int,
         "avg_temperature_c": float,
@@ -92,7 +108,8 @@ def normalize_gold_row(row: dict[str, str]) -> dict[str, Any]:
     }
     normalized: dict[str, Any] = dict(row)
     for field, caster in numeric_fields.items():
-        normalized[field] = caster(row[field])
+        if field in normalized and normalized[field] is not None:
+            normalized[field] = caster(normalized[field])
     return normalized
 
 

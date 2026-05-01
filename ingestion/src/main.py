@@ -71,6 +71,10 @@ def build_client(config: IngestionConfig, connection: Connection) -> mqtt.Client
 
     client.on_connect = on_connect
     client.on_message = on_message
+    if config.mqtt_username:
+        client.username_pw_set(config.mqtt_username, config.mqtt_password)
+    if config.mqtt_use_tls:
+        client.tls_set()
     for attempt in range(1, 21):
         try:
             client.connect(config.mqtt_broker_host, config.mqtt_broker_port, 60)

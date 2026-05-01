@@ -134,6 +134,41 @@ def summarize_group(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def load_gold_rows(input_path: str) -> list[dict[str, Any]]:
+    path = Path(input_path)
+    if not path.exists():
+        return []
+    rows = []
+    with path.open("r", encoding="utf-8", newline="") as file_handle:
+        for row in csv.DictReader(file_handle):
+            try:
+                rows.append({
+                    "event_minute": row["event_minute"],
+                    "equipment_id": row["equipment_id"],
+                    "site": row["site"],
+                    "line": row["line"],
+                    "event_count": int(row["event_count"]),
+                    "avg_temperature_c": float(row["avg_temperature_c"]),
+                    "max_temperature_c": float(row["max_temperature_c"]),
+                    "avg_vibration_mm_s": float(row["avg_vibration_mm_s"]),
+                    "max_vibration_mm_s": float(row["max_vibration_mm_s"]),
+                    "min_lubrication_pressure_bar": float(row["min_lubrication_pressure_bar"]),
+                    "avg_power_kw": float(row["avg_power_kw"]),
+                    "avg_anomaly_score": float(row["avg_anomaly_score"]),
+                    "anomaly_events": int(row["anomaly_events"]),
+                    "quality_issue_events": int(row["quality_issue_events"]),
+                    "flow_missing_events": int(row["flow_missing_events"]),
+                    "warning_events": int(row["warning_events"]),
+                    "critical_events": int(row["critical_events"]),
+                    "avg_ingestion_latency_ms": float(row["avg_ingestion_latency_ms"]),
+                    "max_ingestion_latency_ms": float(row["max_ingestion_latency_ms"]),
+                    "dominant_risk_level": row["dominant_risk_level"],
+                })
+            except (KeyError, ValueError):
+                continue
+    return rows
+
+
 def write_gold_csv(output_path: str, rows: list[dict[str, Any]]) -> None:
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)

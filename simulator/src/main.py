@@ -21,6 +21,10 @@ def build_client(config: SimulatorConfig) -> mqtt.Client:
         mqtt.CallbackAPIVersion.VERSION2,
         client_id=f"{config.mqtt_client_prefix}-{config.equipment_id}",
     )
+    if config.mqtt_username:
+        client.username_pw_set(config.mqtt_username, config.mqtt_password)
+    if config.mqtt_use_tls:
+        client.tls_set()
     for attempt in range(1, 21):
         try:
             client.connect(config.mqtt_broker_host, config.mqtt_broker_port, 60)
