@@ -1,0 +1,111 @@
+services:
+  mqtt:
+    image: eclipse-mosquitto:2
+    container_name: mining-mqtt
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./infrastructure/docker/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: mining-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mining_rt}
+      POSTGRES_USER: ${POSTGRES_USER:-mining}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mining123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  simulator:
+    build:
+      context: ./simulator
+    container_name: mining-simulator
+    env_file:
+      - .env.example
+    depends_on:
+      - mqtt
+
+  ingestion:
+    build:
+      context: ./ingestion
+    container_name: mining-ingestion
+    env_file:
+      - .env.example
+    depends_on:
+      - mqtt
+      - postgres
+    volumes:
+      - ./data/bronze:/app/data/bronze
+      - ./data/dead_letter:/app/data/dead_letter
+
+  processor:
+    build:
+      context: ./processing
+    container_name: mining-processor
+    env_file:
+      - .env.example
+    depends_on:
+      - ingestion
+    volumes:
+      - ./data/bronze:/app/data/bronze:ro
+      - ./data/silver:/app/data/silver
+      - ./data/gold:/app/data/gold
+
+  api:
+    build:
+      context: ./api
+    container_name: mining-api
+    env_file:
+      - .env.example
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+
+  dashboard:
+    build:
+      context: ./dashboards/streamlit
+    container_name: mining-dashboard
+    env_file:
+      - .env.example
+    depends_on:
+      - api
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data/gold:/app/data/gold:ro
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: mining-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - api
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: mining-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_SECURITY_ADMIN_PASSWORD=mining123
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  grafana_data:

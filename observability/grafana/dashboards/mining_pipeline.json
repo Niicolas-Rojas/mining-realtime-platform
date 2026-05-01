@@ -1,0 +1,422 @@
+{
+  "uid": "mining-pipeline",
+  "title": "Mining Realtime Platform",
+  "tags": ["mining"],
+  "timezone": "browser",
+  "refresh": "15s",
+  "schemaVersion": 39,
+  "version": 2,
+  "panels": [
+    {
+      "id": 100,
+      "type": "row",
+      "title": "Pipeline de Ingesta",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Eventos Aceptados",
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 1},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_events_accepted_total", "legendFormat": ""}
+      ],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "fixed", "fixedColor": "green"},
+          "unit": "short", "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Eventos Rechazados",
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 1},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_events_rejected_total", "legendFormat": ""}
+      ],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 5},
+            {"color": "red", "value": 20}
+          ]},
+          "unit": "short", "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Tasa de Error (%)",
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 1},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_error_rate * 100", "legendFormat": ""}
+      ],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 3},
+            {"color": "red", "value": 10}
+          ]},
+          "unit": "percent", "decimals": 1, "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Eventos / Minuto",
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 1},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_events_per_minute", "legendFormat": ""}
+      ],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "fixed", "fixedColor": "blue"},
+          "unit": "short", "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Latencia Promedio (ms)",
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 1},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_ingestion_latency_ms", "legendFormat": ""}
+      ],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 500},
+            {"color": "red", "value": 2000}
+          ]},
+          "unit": "ms", "decimals": 0, "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Eventos Aceptados vs Rechazados",
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 1},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_events_accepted_total", "legendFormat": "Aceptados"},
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_events_rejected_total", "legendFormat": "Rechazados"}
+      ],
+      "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "hidden"}},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short",
+          "custom": {"lineWidth": 1, "fillOpacity": 20}
+        }
+      }
+    },
+    {
+      "id": 101,
+      "type": "row",
+      "title": "Estado del Equipo — Molino SAG (ventana 50 eventos)",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 5},
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 7,
+      "type": "gauge",
+      "title": "Temperatura (°C)",
+      "gridPos": {"h": 5, "w": 4, "x": 0, "y": 6},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_avg_temperature_c", "legendFormat": ""}
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"]},
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 60, "max": 90,
+          "unit": "celsius",
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 78},
+            {"color": "red", "value": 82}
+          ]},
+          "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "gauge",
+      "title": "Vibración (mm/s)",
+      "gridPos": {"h": 5, "w": 4, "x": 4, "y": 6},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_avg_vibration_mm_s", "legendFormat": ""}
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"]},
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0, "max": 6,
+          "unit": "velocityms",
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 4.5},
+            {"color": "red", "value": 4.8}
+          ]},
+          "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "gauge",
+      "title": "Presión de Lubricación (bar)",
+      "gridPos": {"h": 5, "w": 4, "x": 8, "y": 6},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_avg_pressure_bar", "legendFormat": ""}
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"]},
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 1.5, "max": 5,
+          "unit": "pressurebar",
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "red", "value": null},
+            {"color": "yellow", "value": 2.2},
+            {"color": "semi-dark-yellow", "value": 2.8},
+            {"color": "green", "value": 3.2}
+          ]},
+          "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "gauge",
+      "title": "Anomaly Score Promedio",
+      "gridPos": {"h": 5, "w": 4, "x": 12, "y": 6},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_avg_anomaly_score", "legendFormat": ""}
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"]},
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0, "max": 1,
+          "unit": "percentunit",
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 0.4},
+            {"color": "red", "value": 0.7}
+          ]},
+          "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "Eventos Warning",
+      "gridPos": {"h": 5, "w": 4, "x": 16, "y": 6},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_warning_events_window", "legendFormat": ""}
+      ],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 1},
+            {"color": "orange", "value": 5}
+          ]},
+          "unit": "short", "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "Eventos Critical",
+      "gridPos": {"h": 5, "w": 4, "x": 20, "y": 6},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_critical_events_window", "legendFormat": ""}
+      ],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null},
+            {"color": "red", "value": 1}
+          ]},
+          "unit": "short", "noValue": "0"
+        }
+      }
+    },
+    {
+      "id": 102,
+      "type": "row",
+      "title": "Series Temporales",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 11},
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Temperatura y Vibración en el Tiempo",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_avg_temperature_c", "legendFormat": "Temperatura (°C)"},
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_avg_vibration_mm_s * 10", "legendFormat": "Vibración ×10 (mm/s)"}
+      ],
+      "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"lineWidth": 2, "fillOpacity": 10}
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "Temperatura (°C)"},
+            "properties": [
+              {"id": "unit", "value": "celsius"},
+              {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 78}, {"color": "red", "value": 82}]}},
+              {"id": "custom.thresholdsStyle", "value": {"mode": "line"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "Vibración ×10 (mm/s)"},
+            "properties": [
+              {"id": "unit", "value": "short"},
+              {"id": "custom.axisPlacement", "value": "right"}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Presión de Lubricación y Anomaly Score en el Tiempo",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_avg_pressure_bar", "legendFormat": "Presión (bar)"},
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_avg_anomaly_score", "legendFormat": "Anomaly Score"}
+      ],
+      "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"lineWidth": 2, "fillOpacity": 10}
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "Presión (bar)"},
+            "properties": [
+              {"id": "unit", "value": "pressurebar"},
+              {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 2.2}, {"color": "green", "value": 2.8}]}},
+              {"id": "custom.thresholdsStyle", "value": {"mode": "line"}}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "Anomaly Score"},
+            "properties": [
+              {"id": "unit", "value": "percentunit"},
+              {"id": "custom.axisPlacement", "value": "right"},
+              {"id": "min", "value": 0},
+              {"id": "max", "value": 1}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Latencia de Ingesta y Throughput",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_ingestion_latency_ms", "legendFormat": "Latencia promedio"},
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_events_per_minute", "legendFormat": "Eventos/min"}
+      ],
+      "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"lineWidth": 2, "fillOpacity": 10}
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "Latencia promedio"},
+            "properties": [{"id": "unit", "value": "ms"}]
+          },
+          {
+            "matcher": {"id": "byName", "options": "Eventos/min"},
+            "properties": [{"id": "unit", "value": "short"}, {"id": "custom.axisPlacement", "value": "right"}]
+          }
+        ]
+      }
+    },
+    {
+      "id": 16,
+      "type": "timeseries",
+      "title": "Eventos por Estado Operacional",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+      "targets": [
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_warning_events_window", "legendFormat": "Warning"},
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_critical_events_window", "legendFormat": "Critical"},
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "mining_anomaly_events_window", "legendFormat": "Calidad no-ok"}
+      ],
+      "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short",
+          "custom": {"lineWidth": 2, "fillOpacity": 15}
+        },
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Warning"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "yellow"}}]},
+          {"matcher": {"id": "byName", "options": "Critical"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]},
+          {"matcher": {"id": "byName", "options": "Calidad no-ok"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}}]}
+        ]
+      }
+    }
+  ]
+}

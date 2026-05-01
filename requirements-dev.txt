@@ -1,0 +1,5 @@
+-r api/requirements.txt
+-r dashboards/streamlit/requirements.txt
+-r ingestion/requirements.txt
+-r simulator/requirements.txt
+pytest==9.0.3

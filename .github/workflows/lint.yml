@@ -1,0 +1,26 @@
+name: lint
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [simulator, ingestion, api, processing]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f ${{ matrix.service }}/requirements.txt ]; then pip install -r ${{ matrix.service }}/requirements.txt; fi
+      - name: Compile sources
+        run: |
+          if [ -d ${{ matrix.service }}/src ]; then python -m compileall ${{ matrix.service }}/src; fi
+          if [ -d ${{ matrix.service }}/batch ]; then python -m compileall ${{ matrix.service }}/batch; fi

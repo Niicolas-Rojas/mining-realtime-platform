@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/mining-realtime-platform/schemas/telemetry_event.v1.json",
+  "title": "Telemetry Event v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "event_id",
+    "event_ts",
+    "equipment_id",
+    "site",
+    "line",
+    "operational_state",
+    "temperature_c",
+    "vibration_mm_s",
+    "lubrication_pressure_bar",
+    "rpm",
+    "amperage_a",
+    "power_kw",
+    "flow_m3_h",
+    "anomaly_score",
+    "quality_flag"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "equipment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "site": {
+      "type": "string",
+      "minLength": 1
+    },
+    "line": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operational_state": {
+      "type": "string",
+      "enum": ["running", "warning", "critical", "stopped", "maintenance"]
+    },
+    "temperature_c": {
+      "type": "number",
+      "minimum": -20,
+      "maximum": 130
+    },
+    "vibration_mm_s": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 25
+    },
+    "lubrication_pressure_bar": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "rpm": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 30
+    },
+    "amperage_a": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 2000
+    },
+    "power_kw": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 20000
+    },
+    "flow_m3_h": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 500
+    },
+    "anomaly_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "quality_flag": {
+      "type": "string",
+      "enum": ["ok", "partial", "anomalous"]
+    }
+  }
+}

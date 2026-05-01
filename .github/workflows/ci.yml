@@ -1,0 +1,27 @@
+name: ci
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [simulator, ingestion, api, processing]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f ${{ matrix.service }}/requirements.txt ]; then pip install -r ${{ matrix.service }}/requirements.txt; fi
+          pip install pytest
+      - name: Run tests
+        run: pytest ${{ matrix.service }}/tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/${{ matrix.service }}
