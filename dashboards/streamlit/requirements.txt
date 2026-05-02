@@ -1,5 +1,5 @@
-altair==5.4.1
+altair>=5.4.1
 narwhals>=1.5.2,<2.0
-pandas==2.2.3
-requests==2.32.3
-streamlit==1.39.0
+pandas>=2.2.3
+requests>=2.32.3
+streamlit>=1.40.0
