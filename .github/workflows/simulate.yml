@@ -112,6 +112,12 @@ jobs:
           conn.close()
           "
 
+      - name: Keep Streamlit apps alive
+        if: always()
+        run: |
+          curl -s -o /dev/null -w "mining dashboard: %{http_code}\n" https://mining-realtime-platform.streamlit.app/ || true
+          curl -s -o /dev/null -w "etl dashboard: %{http_code}\n" https://copper-analytics-chile.streamlit.app/ || true
+
       - name: Summary
         run: |
           echo "### Simulation complete" >> $GITHUB_STEP_SUMMARY
