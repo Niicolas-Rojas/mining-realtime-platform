@@ -57,7 +57,7 @@ jobs:
 
       - name: Start ingestion service in background
         run: |
-          PYTHONPATH=${{ github.workspace }}/ingestion/src \
+          PYTHONPATH=${{ github.workspace }}/ingestion \
             python ingestion/src/main.py &
           echo "INGESTION_PID=$!" >> $GITHUB_ENV
           echo "Ingestion started (PID=$!), waiting for it to connect..."
