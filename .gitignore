@@ -1,4 +1,6 @@
 .project-master-plan.md
+docs/project-master-plan.md
+docs/azure-demo.md
 __pycache__/
 .pytest_cache/
 .ruff_cache/
