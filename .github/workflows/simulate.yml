@@ -117,6 +117,8 @@ jobs:
         run: |
           curl -s -o /dev/null -w "mining dashboard: %{http_code}\n" https://mining-realtime-platform.streamlit.app/ || true
           curl -s -o /dev/null -w "etl dashboard: %{http_code}\n" https://copper-analytics-chile.streamlit.app/ || true
+          curl -s -o /dev/null -w "predict-mining dashboard: %{http_code}\n" https://predict-mining-dxz2hfe6p8seukxxgetcgq.streamlit.app/ || true
+          curl -s -o /dev/null -w "predict-mining API: %{http_code}\n" https://predict-mining.onrender.com/health || true
 
       - name: Summary
         run: |
