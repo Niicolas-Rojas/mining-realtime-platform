@@ -663,27 +663,62 @@ def render_pipeline_quality_chart(metrics: dict[str, Any]) -> None:
         return
 
     data = [
-        {"tipo": "aceptados", "mensajes": accepted, "pct": round(accepted / total * 100, 1)},
-        {"tipo": "rechazados", "mensajes": rejected, "pct": round(rejected / total * 100, 1)},
+        {
+            "resultado": "Aceptados",
+            "mensajes": accepted,
+            "pct": round(accepted / total * 100, 1),
+            "etiqueta": f"{accepted:,} ({accepted / total:.1%})",
+        },
+        {
+            "resultado": "Rechazados",
+            "mensajes": rejected,
+            "pct": round(rejected / total * 100, 1),
+            "etiqueta": f"{rejected:,} ({rejected / total:.1%})",
+        },
     ]
-    chart = (
-        alt.Chart(alt_values(data))
-        .mark_bar(cornerRadiusEnd=4)
-        .encode(
-            x=alt.X("mensajes:Q", title="mensajes", axis=alt.Axis(format=",")),
-            y=alt.Y("tipo:N", title=None, sort=["aceptados", "rechazados"]),
-            color=alt.Color(
-                "tipo:N",
-                title="resultado",
-                scale=alt.Scale(domain=["aceptados", "rechazados"], range=[COLOR_GREEN, COLOR_RED]),
-            ),
-            tooltip=[
-                alt.Tooltip("tipo:N", title="resultado"),
-                alt.Tooltip("mensajes:Q", title="mensajes", format=","),
-                alt.Tooltip("pct:Q", title="%", format=".1f"),
-            ],
+    max_messages = max(accepted, rejected, 1)
+
+    base = alt.Chart(alt_values(data)).encode(
+        x=alt.X(
+            "mensajes:Q",
+            title="mensajes",
+            scale=alt.Scale(domain=[0, max_messages * 1.22], nice=False),
+            axis=alt.Axis(format=",", tickCount=5),
+        ),
+        y=alt.Y(
+            "resultado:N",
+            title=None,
+            sort=["Aceptados", "Rechazados"],
+            axis=alt.Axis(labelPadding=8, labelLimit=130),
+        ),
+        tooltip=[
+            alt.Tooltip("resultado:N", title="resultado"),
+            alt.Tooltip("mensajes:Q", title="mensajes", format=","),
+            alt.Tooltip("pct:Q", title="participacion", format=".1f"),
+        ],
+    )
+    bars = base.mark_bar(cornerRadiusEnd=6, size=32).encode(
+        color=alt.Color(
+            "resultado:N",
+            title=None,
+            legend=None,
+            scale=alt.Scale(domain=["Aceptados", "Rechazados"], range=[COLOR_GREEN, COLOR_RED]),
         )
-        .properties(height=110, title="Calidad de mensajes")
+    )
+    labels = base.mark_text(
+        align="left",
+        baseline="middle",
+        dx=8,
+        color="#344054",
+        font="Instrument Sans",
+        fontSize=12,
+        fontWeight=700,
+    ).encode(text="etiqueta:N")
+
+    chart = (
+        (bars + labels)
+        .properties(height=170, title="Calidad de mensajes")
+        .configure_axisY(grid=False)
     )
     st.altair_chart(style_chart(chart), use_container_width=True)
 

@@ -2,6 +2,29 @@
 
 Plataforma de monitoreo operacional minero en tiempo real, pensada como proyecto de portafolio con enfoque cloud-first y criterio de arquitectura de datos productiva.
 
+## Lectura rapida para portafolio
+
+Este proyecto demuestra capacidad para disenar y construir un flujo de datos operacional de punta a punta:
+
+- simulacion de telemetria industrial
+- ingesta streaming desacoplada con MQTT
+- persistencia raw en PostgreSQL
+- capas Bronze, Silver y Gold para analisis
+- API FastAPI para consulta operativa
+- dashboard Streamlit para monitoreo y alertas
+
+Forma parte de una trilogia de proyectos de datos aplicada a mineria:
+
+```text
+ETL Mineria Chile -> Mining Realtime Platform -> Predictive Maintenance
+Que paso?            Que esta pasando?           Que va a pasar?
+```
+
+## Demo publica
+
+- Dashboard: https://mining-realtime-platform.streamlit.app/
+- API health: https://mining-api-4dp3.onrender.com/health
+
 ## Objetivo
 
 Simular la telemetria de un equipo critico, inicialmente un molino SAG, para recorrer el flujo completo:
