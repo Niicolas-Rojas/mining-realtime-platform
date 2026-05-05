@@ -1,10 +1,10 @@
 # Mining Realtime Platform
 
-Plataforma de monitoreo operacional minero en tiempo real, pensada como proyecto de portafolio con enfoque cloud-first y criterio de arquitectura de datos productiva.
+Plataforma de monitoreo operacional minero en tiempo real, pensada como proyecto de portafolio para mostrar un flujo de datos completo: simulacion, ingesta, validacion, almacenamiento, API, dashboard y observabilidad.
 
 ## Lectura rapida para portafolio
 
-Este proyecto demuestra capacidad para disenar y construir un flujo de datos operacional de punta a punta:
+Este proyecto busca demostrar, de forma practica, como construir un flujo de datos operacional de punta a punta:
 
 - simulacion de telemetria industrial
 - ingesta streaming desacoplada con MQTT
@@ -25,16 +25,16 @@ Que paso?            Que esta pasando?           Que va a pasar?
 - Dashboard: https://mining-realtime-platform.streamlit.app/
 - API health: https://mining-api-4dp3.onrender.com/health
 
-## Evidencia visual recomendada
+## Evidencia tecnica
 
-Para portafolio y LinkedIn, conviene capturar evidencia de dos capas:
+La demo publica se apoya en dos capas visuales:
 
 - Streamlit: vista `Control`, vista `Pipeline` y vista `Historico Oro`.
 - Grafana: tablero `Mining Realtime Platform`, métricas de ingesta, latencia,
   throughput y gauges operacionales del molino SAG.
 
-Esto muestra no solo visualizacion de datos, sino tambien observabilidad del
-pipeline y criterio de operacion.
+Streamlit muestra la lectura operacional para usuarios finales. Grafana queda
+como evidencia tecnica de observabilidad del pipeline.
 
 ## Objetivo
 
@@ -48,15 +48,16 @@ Simular la telemetria de un equipo critico, inicialmente un molino SAG, para rec
 - exposicion operativa y analitica
 - observabilidad tecnica
 
-## Primer alcance implementado
+## Alcance implementado
 
-Este primer corte deja operativo el vertical slice minimo del sistema:
+La version actual deja operativo el flujo base del sistema:
 
 1. `simulator`: genera telemetria realista y la publica en MQTT.
 2. `ingestion`: consume los eventos, los persiste en PostgreSQL y replica una copia cruda en `data/bronze/`.
 3. `api`: expone salud, telemetria reciente, metricas y alertas activas.
 4. `dashboard`: muestra un tablero Streamlit para inspeccion visual.
-5. `compose.yml`: orquesta broker MQTT, base de datos y los servicios Python.
+5. `observability`: expone metricas Prometheus y tablero Grafana para revisar el pipeline.
+6. `compose.yml`: orquesta broker MQTT, base de datos y los servicios Python.
 
 ## Arquitectura inicial
 
