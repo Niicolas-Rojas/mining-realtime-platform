@@ -25,6 +25,17 @@ Que paso?            Que esta pasando?           Que va a pasar?
 - Dashboard: https://mining-realtime-platform.streamlit.app/
 - API health: https://mining-api-4dp3.onrender.com/health
 
+## Evidencia visual recomendada
+
+Para portafolio y LinkedIn, conviene capturar evidencia de dos capas:
+
+- Streamlit: vista `Control`, vista `Pipeline` y vista `Historico Oro`.
+- Grafana: tablero `Mining Realtime Platform`, métricas de ingesta, latencia,
+  throughput y gauges operacionales del molino SAG.
+
+Esto muestra no solo visualizacion de datos, sino tambien observabilidad del
+pipeline y criterio de operacion.
+
 ## Objetivo
 
 Simular la telemetria de un equipo critico, inicialmente un molino SAG, para recorrer el flujo completo:

@@ -46,6 +46,20 @@ Esta ejecucion demuestra:
 - resumen historico por minuto y equipo
 - dashboard operacional e historico
 
+## Evidencia visual a capturar
+
+Para que el proyecto se entienda rapido fuera del codigo, agregar pantallazos
+en `docs/assets/screenshots/` antes de publicar el caso:
+
+- `streamlit-control-desktop.png`: estado operacional, KPIs y tendencia principal.
+- `streamlit-pipeline-desktop.png`: aceptados, rechazados, tasa de error y latencia.
+- `streamlit-historico-gold-desktop.png`: capa Gold y agregaciones por minuto.
+- `grafana-pipeline-desktop.png`: tablero completo de Prometheus/Grafana.
+- `grafana-latencia-throughput.png`: latencia de ingesta y eventos por minuto.
+
+Los pantallazos de Grafana son especialmente valiosos porque demuestran
+observabilidad del sistema, no solo visualizacion analitica.
+
 ## Como regenerar resultados
 
 ```bash

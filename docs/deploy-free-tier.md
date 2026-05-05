@@ -9,11 +9,13 @@ GitHub Actions (Lun/Jue)
                                       │
                               Render — API FastAPI (free, duerme)
                                       │
-                         Streamlit Cloud — Dashboard (free, siempre activo)
+                         Streamlit Cloud — Dashboard (free, hiberna sin visitas)
 ```
 
-Los datos persisten en Supabase entre corridas. El dashboard siempre está
-disponible. La API despierta en ~30 segundos cuando alguien la visita.
+Los datos persisten en Supabase entre corridas. La API despierta en ~30
+segundos cuando alguien la visita. El dashboard Streamlit puede hibernar tras
+periodos sin visitas; para portafolio se recomienda un wake-up con navegador
+real desde GitHub Actions.
 
 ---
 
@@ -176,10 +178,10 @@ En el servicio creado → **Environment** → agregar:
 ### 5.4 Hacer el primer deploy
 
 1. **Deploy** → esperar que construya la imagen Docker (~3-5 minutos)
-2. Una vez en estado **Live**, anotar la URL: `https://mining-api.onrender.com`
-3. Probar: abrir `https://mining-api.onrender.com/health` en el navegador
+2. Una vez en estado **Live**, anotar la URL: `https://mining-api-4dp3.onrender.com`
+3. Probar: abrir `https://mining-api-4dp3.onrender.com/health` en el navegador
    - Debe responder: `{"status":"ok","service":"api"}`
-4. Probar endpoint de datos: `https://mining-api.onrender.com/api/v1/telemetry/recent`
+4. Probar endpoint de datos: `https://mining-api-4dp3.onrender.com/api/v1/telemetry/recent`
 
 > **Importante:** La primera vez que llames a la API después de un período
 > de inactividad, puede tardar 30-50 segundos en despertar (cold start del
@@ -210,7 +212,7 @@ Antes de hacer deploy, agregar el secret de la API:
 2. Pegar el contenido:
 
 ```toml
-API_BASE_URL = "https://mining-api.onrender.com"
+API_BASE_URL = "https://mining-api-4dp3.onrender.com"
 ```
 
 3. Hacer clic en **Save**
@@ -225,6 +227,11 @@ API_BASE_URL = "https://mining-api.onrender.com"
 > la primera vez si el workflow del simulador aún no corrió suficientes eventos.
 > Correr el workflow nuevamente con `duration_seconds=600` para poblar datos.
 
+> **Nota sobre Streamlit:** Community Cloud puede hibernar la app despues de
+> periodos sin visitas. Para portafolio, mantener un workflow separado en el
+> repo del sitio personal que abra la app con navegador real y presione el
+> boton de wake-up si aparece. Un `curl` simple puede no despertar la app.
+
 ---
 
 ## Paso 7 — Verificación completa del sistema
@@ -235,8 +242,8 @@ Checklist para confirmar que todo funciona end-to-end:
 [ ] Workflow simulate.yml corre sin errores en GitHub Actions
 [ ] raw_telemetry tiene filas en Supabase Table Editor
 [ ] gold_summary tiene filas en Supabase Table Editor
-[ ] https://mining-api.onrender.com/health responde ok
-[ ] https://mining-api.onrender.com/api/v1/metrics/summary responde con datos
+[ ] https://mining-api-4dp3.onrender.com/health responde ok
+[ ] https://mining-api-4dp3.onrender.com/api/v1/metrics/summary responde con datos
 [ ] https://mining-realtime-platform.streamlit.app carga sin errores
 [ ] Tab "Control" muestra gráficos con datos reales
 [ ] Tab "Pipeline" muestra eventos aceptados/rechazados
@@ -260,8 +267,11 @@ Para ajustar el horario, editar `.github/workflows/simulate.yml`:
 
 ```yaml
 schedule:
-  - cron: "0 13 * * 1,4"  # 10:00 hora Chile (UTC-3)
+  - cron: "0 13 * * 1,4"  # 10:00 hora Chile en horario de verano (UTC-3)
 ```
+
+GitHub Actions usa UTC. Si se necesita una hora exacta en Chile durante todo
+el año, revisar el cron cuando cambie el horario de verano/invierno.
 
 Para aumentar la duración de cada corrida (más datos generados):
 - Ir a Actions → scheduled-simulator → Run workflow
@@ -369,10 +379,10 @@ GitHub Pages publica automáticamente en 1-2 minutos.
 
 | Servicio | URL |
 |----------|-----|
-| Dashboard (siempre activo) | `https://mining-realtime-platform.streamlit.app` |
-| API (despierta en ~30s) | `https://mining-api.onrender.com` |
-| API Health | `https://mining-api.onrender.com/health` |
-| API Docs (Swagger) | `https://mining-api.onrender.com/docs` |
+| Dashboard Streamlit | `https://mining-realtime-platform.streamlit.app` |
+| API (despierta en ~30s) | `https://mining-api-4dp3.onrender.com` |
+| API Health | `https://mining-api-4dp3.onrender.com/health` |
+| API Docs (Swagger) | `https://mining-api-4dp3.onrender.com/docs` |
 | Portafolio | `https://niicolas-rojas.github.io` |
 | Repo | `https://github.com/Niicolas-Rojas/mining-realtime-platform` |
 
@@ -385,7 +395,7 @@ GitHub Pages publica automáticamente en 1-2 minutos.
 | Supabase | Free | 500 MB storage, 2 proyectos |
 | HiveMQ Cloud | Free Serverless | 100 conexiones, tráfico limitado |
 | Render | Free | 750h/mes, duerme a los 15min |
-| Streamlit Cloud | Free | Ilimitado, siempre activo |
+| Streamlit Cloud | Free | Apps publicas gratis, hibernan sin visitas |
 | GitHub Actions | Free | 2.000 min/mes (suficiente para ~20 corridas de 10min) |
 
 **Costo total mensual: $0**
