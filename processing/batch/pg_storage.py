@@ -91,8 +91,8 @@ def build_postgres_dsn() -> str:
 
 def ensure_gold_schema(connection: "Connection") -> None:
     with connection.cursor() as cursor:
-        cursor.execute(CREATE_GOLD_TABLE_SQL)
-        cursor.execute(CREATE_GOLD_INDEX_SQL)
+        cursor.execute(CREATE_GOLD_TABLE_SQL, prepare=False)
+        cursor.execute(CREATE_GOLD_INDEX_SQL, prepare=False)
     connection.commit()
 
 
