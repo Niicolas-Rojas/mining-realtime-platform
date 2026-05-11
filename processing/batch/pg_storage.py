@@ -127,7 +127,8 @@ def write_gold_rows(connection: "Connection", rows: list[dict[str, Any]]) -> int
     ]
 
     with connection.cursor() as cursor:
-        cursor.executemany(UPSERT_GOLD_SQL, values)
+        for values_tuple in values:
+            cursor.execute(UPSERT_GOLD_SQL, values_tuple, prepare=False)
 
     connection.commit()
     return len(rows)
