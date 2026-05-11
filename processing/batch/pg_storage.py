@@ -32,9 +32,12 @@ CREATE TABLE IF NOT EXISTS gold_summary (
     dominant_risk_level TEXT,
     processed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (event_minute, equipment_id)
-);
+)
+"""
+
+CREATE_GOLD_INDEX_SQL = """
 CREATE INDEX IF NOT EXISTS idx_gold_summary_event_minute
-    ON gold_summary (event_minute DESC);
+    ON gold_summary (event_minute DESC)
 """
 
 UPSERT_GOLD_SQL = """
@@ -89,6 +92,7 @@ def build_postgres_dsn() -> str:
 def ensure_gold_schema(connection: "Connection") -> None:
     with connection.cursor() as cursor:
         cursor.execute(CREATE_GOLD_TABLE_SQL)
+        cursor.execute(CREATE_GOLD_INDEX_SQL)
     connection.commit()
 
 
