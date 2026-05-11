@@ -24,7 +24,7 @@ def connect_postgres():
     dsn = build_postgres_dsn()
     for attempt in range(1, 11):
         try:
-            conn = connect(dsn)
+            conn = connect(dsn, prepare_threshold=0)
             ensure_gold_schema(conn)
             print(f"processor connected to postgres on attempt={attempt}", flush=True)
             return conn

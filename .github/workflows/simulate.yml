@@ -104,7 +104,7 @@ jobs:
           )
           print(f'gold: input={gold.input_rows} output={gold.output_rows}')
 
-          conn = connect(build_postgres_dsn())
+          conn = connect(build_postgres_dsn(), prepare_threshold=0)
           ensure_gold_schema(conn)
           rows = load_gold_rows(os.getenv('GOLD_SUMMARY_PATH'))
           written = write_gold_rows(conn, rows)

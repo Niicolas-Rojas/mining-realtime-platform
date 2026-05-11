@@ -95,32 +95,35 @@ def ensure_gold_schema(connection: "Connection") -> None:
 def write_gold_rows(connection: "Connection", rows: list[dict[str, Any]]) -> int:
     if not rows:
         return 0
+
+    values = [
+        (
+            row["event_minute"],
+            row["equipment_id"],
+            row["site"],
+            row["line"],
+            row["event_count"],
+            row["avg_temperature_c"],
+            row["max_temperature_c"],
+            row["avg_vibration_mm_s"],
+            row["max_vibration_mm_s"],
+            row["min_lubrication_pressure_bar"],
+            row["avg_power_kw"],
+            row["avg_anomaly_score"],
+            row["anomaly_events"],
+            row["quality_issue_events"],
+            row["flow_missing_events"],
+            row["warning_events"],
+            row["critical_events"],
+            row["avg_ingestion_latency_ms"],
+            row["max_ingestion_latency_ms"],
+            row["dominant_risk_level"],
+        )
+        for row in rows
+    ]
+
     with connection.cursor() as cursor:
-        for row in rows:
-            cursor.execute(
-                UPSERT_GOLD_SQL,
-                (
-                    row["event_minute"],
-                    row["equipment_id"],
-                    row["site"],
-                    row["line"],
-                    row["event_count"],
-                    row["avg_temperature_c"],
-                    row["max_temperature_c"],
-                    row["avg_vibration_mm_s"],
-                    row["max_vibration_mm_s"],
-                    row["min_lubrication_pressure_bar"],
-                    row["avg_power_kw"],
-                    row["avg_anomaly_score"],
-                    row["anomaly_events"],
-                    row["quality_issue_events"],
-                    row["flow_missing_events"],
-                    row["warning_events"],
-                    row["critical_events"],
-                    row["avg_ingestion_latency_ms"],
-                    row["max_ingestion_latency_ms"],
-                    row["dominant_risk_level"],
-                ),
-            )
+        cursor.executemany(UPSERT_GOLD_SQL, values)
+
     connection.commit()
     return len(rows)
