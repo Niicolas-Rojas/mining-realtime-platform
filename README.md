@@ -25,6 +25,25 @@ Que paso?            Que esta pasando?           Que va a pasar?
 - Dashboard: https://mining-realtime-platform.streamlit.app/
 - API health: https://mining-api-4dp3.onrender.com/health
 
+## Dashboards y observabilidad
+
+Grafana expone el dashboard `Mining Realtime Platform` con visualización en tiempo real:
+
+- **Pipeline de Ingesta**: métricas de eventos aceptados, rechazados, tasa de error y latencia
+- **Estado del Equipo**: gauges operacionales del molino SAG (temperatura, vibración, presión, anomaly score)
+- **Series Temporales**: comportamiento de variables críticas en el tiempo
+- **Alertas y eventos**: eventos por estado operacional y métricas del pipeline
+
+Accede a Grafana localmente en `http://localhost:3000` (usuario: `admin`, contraseña: `mining123`).
+
+## Captura de Grafana
+
+A continuación se muestra un screenshot del dashboard local de Grafana con datos generados por el pipeline:
+
+![Grafana dashboard local](docs/screenshots/image.png)
+
+Esta imagen corresponde a una ejecución local del stack, con el simulador, la ingesta y el procesamiento activos. El panel de Grafana refleja métricas de ingesta, latencia y control operacional del molino SAG.
+
 ## Evidencia tecnica
 
 La demo publica se apoya en dos capas visuales:
@@ -35,6 +54,8 @@ La demo publica se apoya en dos capas visuales:
 
 Streamlit muestra la lectura operacional para usuarios finales. Grafana queda
 como evidencia tecnica de observabilidad del pipeline.
+
+> Nota: Grafana requiere datos locales para mostrar las métricas del pipeline. Si el stack local no está ejecutando el simulador y el procesamiento, los paneles pueden aparecer vacíos o con "No data".
 
 ## Objetivo
 
@@ -128,6 +149,8 @@ Variables principales:
 docker compose up --build
 ```
 
+> Nota: para que el stack local funcione completamente y Grafana muestre datos, debes crear un entorno virtual Python `venv` e instalar las dependencias antes de ejecutar el script de demo local.
+
 Tambien existe un script para preparar la demo local completa:
 
 ```bash
@@ -135,6 +158,8 @@ Tambien existe un script para preparar la demo local completa:
 ```
 
 El script ejecuta pruebas, levanta servicios, espera la API y genera las capas Silver y Gold.
+
+Si solo quieres ver la demo pública de Streamlit, no necesitas Grafana local. Pero para tomar screenshots de Grafana es necesario ejecutar el stack local y generar datos, porque Grafana solo mostrará datos cuando el pipeline esté produciendo eventos.
 
 Servicios incluidos:
 
